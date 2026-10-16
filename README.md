@@ -15,7 +15,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-2.1.289+-d97757?style=flat-square&labelColor=242137" alt="Claude Code 2.1.289 or later">
-  <img src="https://img.shields.io/badge/version-0.8.1-b1b9f9?style=flat-square&labelColor=242137" alt="Version 0.8.1">
+  <img src="https://img.shields.io/badge/version-0.8.2-b1b9f9?style=flat-square&labelColor=242137" alt="Version 0.8.2">
   <img src="https://img.shields.io/badge/license-MIT-91c882?style=flat-square&labelColor=242137" alt="MIT license">
 </p>
 
@@ -101,7 +101,7 @@ On macOS a card shows what Spotify or Apple Music is playing, in an accent read 
 
 ### In the desktop app
 
-Claude Code Desktop draws the figures as four rings in a row: the context with its tokens, the minutes the cache has left with the time it expires, and the 5-hour and weekly limits with the time until each starts over. The desktop has no music card.
+Claude Code Desktop draws the terminal's header on a still line (the model and effort, the folder, the branch, the subagents, the lines edited), and under it four rings in a row: the context with its tokens, the minutes the cache has left with the time it expires, and the 5-hour and weekly limits with the time until each starts over. The spend follows in words, with the tokens in and out, without the terminal's bars. The desktop has no music card.
 
 ## Requirements
 

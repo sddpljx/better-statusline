@@ -355,7 +355,7 @@ async function begin($: EngineInterface, options: Options, withMusic: boolean) {
   void setUp($, options).then(machine => (withMusic && machine.folder !== null ? listen($) : undefined))
 }
 
-/** The four rings for the desktop app, which has no music card; each minute's wake draws them again, as it does the terminal's. */
+/** The header and the rings for the desktop app, which has no music card; each minute's wake draws them again, as it does the terminal's. */
 function desktop($: EngineInterface, e: RenderInput<'AbovePrompt', 'desktop'>, figures: Status, machine: Environment, cached: number | null, now: number) {
   const drawn = statusOf(figures, machine, cached, e.props.isWorking, now)
   const { Box, Svg } = $.ui.resolve(e)

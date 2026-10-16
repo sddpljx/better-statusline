@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "better-statusline, a status line for Claude Code by Ewen Gao, in sddpljx's fork",
-    "version": "0.8.1"
+    "version": "0.8.2"
   },
   "plugins": [
     {
       "name": "better-statusline",
       "source": "./",
       "description": "The status line above the prompt: the session's status and the music playing, one design",
-      "version": "0.8.1"
+      "version": "0.8.2"
     }
   ]
 }
