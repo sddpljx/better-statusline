@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/poster.jpg" width="100%" alt="better-statusline, by Ewen Gao: the band above the prompt, a music card beside the rings of context, cache and the limits">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/poster.jpg" width="100%" alt="better-statusline, by Ewen Gao: the band above the prompt, a music card beside the rings of context, cache and the limits">
 </p>
 
 <h1 align="center">better-statusline</h1>
@@ -10,8 +10,12 @@
 </p>
 
 <p align="center">
+  <sub>A fork of Ewen Gao's <a href="https://github.com/Autumn1337/better-statusline">better-statusline</a>: the band stays after <code>/clear</code>, and the desktop app shows four rings.</sub>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-2.1.289+-d97757?style=flat-square&labelColor=242137" alt="Claude Code 2.1.289 or later">
-  <img src="https://img.shields.io/badge/version-0.7.1-b1b9f9?style=flat-square&labelColor=242137" alt="Version 0.7.1">
+  <img src="https://img.shields.io/badge/version-0.8.0-b1b9f9?style=flat-square&labelColor=242137" alt="Version 0.8.0">
   <img src="https://img.shields.io/badge/license-MIT-91c882?style=flat-square&labelColor=242137" alt="MIT license">
 </p>
 
@@ -25,7 +29,7 @@
 ## The film
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/film.webp" width="100%" alt="The film: a dot becomes a braille cell, a circle is snapped to dots, the rings fill, the music card takes its colour from its cover, and the whole band folds and turns from dark to light">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/film.webp" width="100%" alt="The film: a dot becomes a braille cell, a circle is snapped to dots, the rings fill, the music card takes its colour from its cover, and the whole band folds and turns from dark to light">
 </p>
 
 <p align="center">
@@ -39,13 +43,13 @@
 
 ## What it shows
 
-![The band as it stands: the music card, then the header over the rings of context, cache, 5-hour and weekly, and the bars of spend](https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/band.png)
+![The band as it stands: the music card, then the header over the rings of context, cache, 5-hour and weekly, and the bars of spend](https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/band.png)
 
 ### Drawn in dots
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/01-eight-dots.jpg" width="49%" alt="A braille cell: eight dots, two across and four down">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/02-true-circle.jpg" width="49%" alt="A circle laid over the terminal's grid of dots, each point of it snapped to the nearest dot">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/01-eight-dots.jpg" width="49%" alt="A braille cell: eight dots, two across and four down">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/02-true-circle.jpg" width="49%" alt="A circle laid over the terminal's grid of dots, each point of it snapped to the nearest dot">
 </p>
 
 A braille cell is eight dots. Every drawing here is made of them: a ring is a true circle, found on the screen and snapped dot by dot to the terminal's grid.
@@ -53,12 +57,12 @@ A braille cell is eight dots. Every drawing here is made of them: a ring is a tr
 ### Rings
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/03-context.jpg" width="49%" alt="The context ring: 26%, 259k of 1M">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/04-cache.jpg" width="49%" alt="The cache ring: four minutes left of an hour">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/03-context.jpg" width="49%" alt="The context ring: 26%, 259k of 1M">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/04-cache.jpg" width="49%" alt="The cache ring: four minutes left of an hour">
 </p>
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/05-limits.jpg" width="49%" alt="The 5-hour and weekly rings, the weekly one yellow past its pace">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/06-rings.jpg" width="49%" alt="The four rings in a row: context, cache, 5-hour, weekly">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/05-limits.jpg" width="49%" alt="The 5-hour and weekly rings, the weekly one yellow past its pace">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/06-rings.jpg" width="49%" alt="The four rings in a row: context, cache, 5-hour, weekly">
 </p>
 
 Each ring is lit clockwise from its top, with its figure at its heart.
@@ -72,7 +76,7 @@ Above them, a header names the model and its effort, the folder, the git branch 
 ### Spend
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/07-spend.jpg" width="49%" alt="Bars of dots, one for each turn, beside the session's total and its tokens in and out">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/07-spend.jpg" width="49%" alt="Bars of dots, one for each turn, beside the session's total and its tokens in and out">
 </p>
 
 One bar for each recent turn, beside the session's total. The bars grow by the square root of the cost, so one dear turn leaves the rest standing.
@@ -80,8 +84,8 @@ One bar for each recent turn, beside the session's total. The bars grow by the s
 ### Music
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/08-colour.jpg" width="49%" alt="The cover's pixels sorted by hue round a wheel, the fullest slice chosen as the card's accent">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/09-card.jpg" width="49%" alt="The music card: the cover in its glow, the title, artist and album, the line and the controls, in the cover's own colour">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/08-colour.jpg" width="49%" alt="The cover's pixels sorted by hue round a wheel, the fullest slice chosen as the card's accent">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/09-card.jpg" width="49%" alt="The music card: the cover in its glow, the title, artist and album, the line and the controls, in the cover's own colour">
 </p>
 
 On macOS a card shows what Spotify or Apple Music is playing, in an accent read out of the cover. It takes the mouse: play, pause, skip, seek along the line, shuffle, repeat, and the volume at the right end of the controls.
@@ -89,11 +93,15 @@ On macOS a card shows what Spotify or Apple Music is playing, in an accent read 
 ### The band
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/10-terminal.jpg" width="49%" alt="The whole band in a terminal window, above the prompt">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/11-themes.jpg" width="49%" alt="The band turning from dark to light">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/10-terminal.jpg" width="49%" alt="The whole band in a terminal window, above the prompt">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/11-themes.jpg" width="49%" alt="The band turning from dark to light">
 </p>
 
 `/fold` folds the whole band into one row, and opens it again. The colours are Claude Code's own theme, so the band follows it from dark to light.
+
+### In the desktop app
+
+Claude Code Desktop draws the figures as four rings in a row: the context with its tokens, the cache counting down to the second with the time it expires, and the 5-hour and weekly limits with when each starts over. The desktop has no music card.
 
 ## Requirements
 
@@ -114,30 +122,28 @@ The plugin is built on Claude Code's function hooks, an early-access API that st
 From the marketplace this repository carries:
 
 ```sh
-claude plugin marketplace add Autumn1337/better-statusline
-claude plugin install better-statusline@better-statusline
+claude plugin marketplace add sddpljx/better-statusline
+claude plugin install better-statusline@better-statusline-td
+```
+
+Where the original is installed, remove it first: the two share the plugin's name.
+
+```sh
+claude plugin uninstall better-statusline@better-statusline
+claude plugin marketplace remove better-statusline
 ```
 
 To take a new version later:
 
 ```sh
-claude plugin marketplace update better-statusline
-claude plugin update better-statusline@better-statusline
+claude plugin marketplace update better-statusline-td
+claude plugin update better-statusline@better-statusline-td
 ```
-
-Or install from npm and load it for one session:
-
-```sh
-npm install -g better-statusline
-claude --plugin-dir "$(npm root -g)/better-statusline"
-```
-
-To update the npm installation, run `npm install -g better-statusline@latest`.
 
 To load from a clone for one session:
 
 ```sh
-git clone https://github.com/Autumn1337/better-statusline
+git clone https://github.com/sddpljx/better-statusline
 claude --plugin-dir ./better-statusline
 ```
 
@@ -160,7 +166,7 @@ At rest the band costs nothing you can measure. Each frame it draws is a redraw 
 
 ```
 hooks/register.tsx   every hook, and all that reaches the engine
-hooks/*.ts           what the hooks compute: the status, the music, the terminal
+hooks/*.ts           what the hooks compute: the status, the music, the terminal, the desktop's rings
 ui/*.tsx             the three surface modules: the status, the card, the one-line player
 ui/dots.ts           the dot drawings: rings, bars, lanes
 bridge/              the scripts that reach the Mac: the players, the cover, the cell size
@@ -183,5 +189,5 @@ tsc -p .
 MIT © Ewen Gao
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Autumn1337/better-statusline/main/docs/stills/12-name.jpg" width="49%" alt="better-statusline, Ewen Gao">
+  <img src="https://raw.githubusercontent.com/sddpljx/better-statusline/main/docs/stills/12-name.jpg" width="49%" alt="better-statusline, Ewen Gao">
 </p>

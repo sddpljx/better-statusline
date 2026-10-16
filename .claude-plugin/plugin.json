@@ -1,10 +1,10 @@
 {
   "name": "better-statusline",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "The status line above the prompt: the session's status and the music playing, one design",
   "author": { "name": "Ewen Gao" },
   "license": "MIT",
-  "repository": "https://github.com/Autumn1337/better-statusline",
+  "repository": "https://github.com/sddpljx/better-statusline",
   "keywords": ["statusline", "status", "music", "spotify", "terminal"],
   "types": "./types/index.d.ts",
   "userConfig": {

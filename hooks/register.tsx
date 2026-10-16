@@ -5,7 +5,7 @@ import type { Counted, Environment, Icons, MusicLook, MusicPlayer, Status } from
 import { CARD, RESERVE, SIGNATURE, SPACE, playhead, textColumns, type Message, type PlayerProps, type View } from '../ui/shared'
 import { MUSIC_COVER, REPEAT, artworkOf, canvasOf, cardColumns, coverOf, viewOf } from './music'
 import { UNEDITED, ZERO, counted, fixedCacheSpan, gitOf, nextMinute, statusOf } from './status'
-import { strip } from './strip'
+import { cacheLeft, rings } from './rings'
 import { terminalOf } from './terminal'
 
 const player = atom({ plugin: 'better-statusline', key: 'player' } as const, null)
@@ -334,26 +334,55 @@ function mini($: EngineInterface, e: RenderInput<'AbovePrompt', 'terminal' | 'de
   )
 }
 
-function pills($: EngineInterface, e: RenderInput<'AbovePrompt', 'desktop'>, { usage, tokens }: Status, now: number) {
-  if (usage.rateLimits.length === 0 && tokens.received === 0) return null
-  const { Svg } = $.ui.resolve(e)
-  const drawn = strip(usage.rateLimits, tokens, usage.cost?.usd ?? 0, now)
-  return <Svg source={drawn.source} alt={drawn.alt} width={drawn.width} height={drawn.height} />
+/** Whether this process has set the session up: once, from the first of an interactive start and a desktop's render. */
+let isBegun = false
+
+/**
+ * The session's figures, the machine, and the timers that keep them current, set up once a process; the player's
+ * bridge too where `withMusic`, which only the terminal draws.
+ */
+async function begin($: EngineInterface, options: Options, withMusic: boolean) {
+  if (isBegun) return
+  isBegun = true
+  await Promise.all([
+    $.command.register({ name: 'fold', description: 'Fold the status line into one row, or open it to five', immediate: true }),
+    seed($),
+  ])
+  void readGit($)
+  plan($)
+  watchAgents($)
+  $.clock.every(60_000, () => void readGit($))
+  void setUp($, options).then(machine => (withMusic && machine.folder !== null ? listen($) : undefined))
+}
+
+/** The desktop's next wake while the cache counts down: the moment its seconds change. */
+let second: Timer | undefined
+
+function nextSecond($: EngineInterface, left: number | null) {
+  if (second !== undefined || left === null || left <= 0) return
+  second = $.clock.after((left % 1000) + LATE, () => {
+    second = undefined
+    $.ui.invalidate('ui.render')
+  })
+}
+
+/** The four rings for the desktop app, which has no music card. */
+function desktop($: EngineInterface, e: RenderInput<'AbovePrompt', 'desktop'>, figures: Status, machine: Environment, cached: number | null, now: number) {
+  const drawn = statusOf(figures, machine, cached, e.props.isWorking, now)
+  nextSecond($, cacheLeft(drawn.cache, now))
+  const { Box, Svg } = $.ui.resolve(e)
+  const svg = rings(drawn, now)
+  return (
+    <Box width={e.props.bodyColumns}>
+      <Svg source={svg.source} alt={svg.alt} width={svg.width} height={svg.height} />
+    </Box>
+  )
 }
 
 export const register: Register = (on, options) => {
   on('session.start', async ($, e, next) => {
     const started = await next(e)
-    if (!e.isInteractive) return started
-    await Promise.all([
-      $.command.register({ name: 'fold', description: 'Fold the status line into one row, or open it to five', immediate: true }),
-      seed($),
-    ])
-    void readGit($)
-    plan($)
-    watchAgents($)
-    $.clock.every(60_000, () => void readGit($))
-    void setUp($, options as Options).then(machine => (machine.folder === null ? undefined : listen($)))
+    if (e.isInteractive) await begin($, options as Options, true)
     return started
   })
 
@@ -491,22 +520,16 @@ export const register: Register = (on, options) => {
       read($, status),
       read($, cachedAt),
     ])
-    if (machine === null || figures === null) return next(e)
+    if (machine === null || figures === null) {
+      if (e.surface === 'desktop') void begin($, options as Options, false)
+      return next(e)
+    }
+    const now = Date.now()
+    if (e.surface === 'desktop') return desktop($, e, figures, machine, cached, now)
     if (machine.drawsPictures) watchViewport($, e.viewport)
     const view = current === null ? null : viewOf(current, trackLook)
     const art = trackLook?.art ?? null
-    const now = Date.now()
     const { Box, Client } = $.ui.resolve(e)
-    if (e.surface === 'desktop') {
-      const usage = pills($, e, figures, now)
-      if (view === null && usage === null) return next(e)
-      return (
-        <Box width={e.props.bodyColumns}>
-          {view !== null && mini($, e, view, machine, art)}
-          {usage !== null && <Box marginLeft={view === null ? 0 : SPACE}>{usage}</Box>}
-        </Box>
-      )
-    }
     const isCoverless = current !== null && trackLook?.id === current.track.id && art === null
     const canvas = canvasOf(machine)
     const columns = canvas === null || isCoverless ? 0 : coverOf(canvas).columns
