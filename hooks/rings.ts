@@ -1,4 +1,4 @@
-import { amount, clock, type StatusProps } from '../ui/shared'
+import { amount, span, type StatusProps } from '../ui/shared'
 
 /** One panel in CSS pixels: its width, the ring's centre, radius and stroke, where the words start, the drawing's height. */
 const PANEL = 218
@@ -7,9 +7,6 @@ const RADIUS = 22
 const STROKE = 5
 const WORDS = 66
 const HEIGHT = 62
-/** Milliseconds in a day: a reset further off than this is named by its weekday, a nearer one by its time. */
-const DAY = 86_400_000
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const HUES: Record<string, [light: string, dark: string]> = {
   coral: ['#d97757', '#e58e6f'],
@@ -41,9 +38,6 @@ const escaped = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt
 const twoDigits = (n: number) => String(n).padStart(2, '0')
 const timeOf = (ms: number) => `${twoDigits(new Date(ms).getHours())}:${twoDigits(new Date(ms).getMinutes())}`
 
-/** When a limit starts over: its time within a day, its weekday beyond. */
-const resetOf = (at: number, now: number) => (at - now < DAY ? timeOf(at) : WEEKDAYS[new Date(at).getDay()]!)
-
 type Ring = { title: string; hue: string; used: number; value: string; detail: string }
 
 /** A ring lit clockwise from its top as far as `used` (0 to 1), its title, its figure and a line of detail beside it. */
@@ -62,17 +56,14 @@ function panel(ring: Ring, x: number) {
   ].join('')
 }
 
-/** Milliseconds the prompt cache has left at `now`: null before the session's first response. */
-export const cacheLeft = (cache: StatusProps['cache'], now: number) => (cache.at === null ? null : cache.at + cache.span - now)
-
 /**
  * The session's figures as four rings in a row, for the desktop app, which draws markup where the terminal draws
- * cells: the context window, the prompt cache counting down to the second, and each rate-limit window. An SVG in the
- * app's own light or dark, with the same told in words as its `alt`.
+ * cells: the context window, the prompt cache's minutes left, and each rate-limit window with the time until it
+ * starts over. An SVG in the app's own light or dark, with the same told in words as its `alt`.
  */
 export function rings(status: StatusProps, now: number) {
   const { context, cache, limits } = status
-  const left = cacheLeft(cache, now)
+  const left = cache.at === null ? null : cache.at + cache.span - now
   const drawn: Ring[] = [
     {
       title: 'CONTEXT',
@@ -85,7 +76,7 @@ export function rings(status: StatusProps, now: number) {
       title: 'CACHE',
       hue: 'teal',
       used: left === null ? 0 : left / cache.span,
-      value: left === null ? '–' : left > 0 ? clock(Math.ceil(left / 1000)) : 'cold',
+      value: left === null ? '–' : left > 0 ? `${Math.ceil(left / 60_000)} min` : 'cold',
       detail: left === null ? 'no reply yet' : `${left > 0 ? 'expires' : 'expired'} ${timeOf(cache.at! + cache.span)}`,
     },
     ...limits.flatMap(limit => {
@@ -97,7 +88,7 @@ export function rings(status: StatusProps, now: number) {
           hue: limit.percent >= 90 ? 'alarm' : look.hue,
           used: limit.percent / 100,
           value: `${Math.round(limit.percent)}%`,
-          detail: limit.resetsAt === null ? '' : `resets ${resetOf(limit.resetsAt, now)}`,
+          detail: limit.resetsAt === null ? '' : span(limit.resetsAt - now),
         },
       ]
     }),

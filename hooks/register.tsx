@@ -5,7 +5,7 @@ import type { Counted, Environment, Icons, MusicLook, MusicPlayer, Status } from
 import { CARD, RESERVE, SIGNATURE, SPACE, playhead, textColumns, type Message, type PlayerProps, type View } from '../ui/shared'
 import { MUSIC_COVER, REPEAT, artworkOf, canvasOf, cardColumns, coverOf, viewOf } from './music'
 import { UNEDITED, ZERO, counted, fixedCacheSpan, gitOf, nextMinute, statusOf } from './status'
-import { cacheLeft, rings } from './rings'
+import { rings } from './rings'
 import { terminalOf } from './terminal'
 
 const player = atom({ plugin: 'better-statusline', key: 'player' } as const, null)
@@ -355,21 +355,9 @@ async function begin($: EngineInterface, options: Options, withMusic: boolean) {
   void setUp($, options).then(machine => (withMusic && machine.folder !== null ? listen($) : undefined))
 }
 
-/** The desktop's next wake while the cache counts down: the moment its seconds change. */
-let second: Timer | undefined
-
-function nextSecond($: EngineInterface, left: number | null) {
-  if (second !== undefined || left === null || left <= 0) return
-  second = $.clock.after((left % 1000) + LATE, () => {
-    second = undefined
-    $.ui.invalidate('ui.render')
-  })
-}
-
-/** The four rings for the desktop app, which has no music card. */
+/** The four rings for the desktop app, which has no music card; each minute's wake draws them again, as it does the terminal's. */
 function desktop($: EngineInterface, e: RenderInput<'AbovePrompt', 'desktop'>, figures: Status, machine: Environment, cached: number | null, now: number) {
   const drawn = statusOf(figures, machine, cached, e.props.isWorking, now)
-  nextSecond($, cacheLeft(drawn.cache, now))
   const { Box, Svg } = $.ui.resolve(e)
   const svg = rings(drawn, now)
   return (
