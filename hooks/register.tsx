@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register, RenderInput, ResolveInput, Timer } from 'claude-code'
 
-import type { Counted, Environment, Icons, MusicPlayer, Status } from '../types'
+import type { Counted, Environment, Icons, MusicLook, MusicPlayer, Status } from '../types'
 import { CARD, RESERVE, SIGNATURE, SPACE, playhead, textColumns, type Message, type PlayerProps, type View } from '../ui/shared'
 import { MUSIC_COVER, REPEAT, artworkOf, canvasOf, cardColumns, coverOf, viewOf } from './music'
 import { UNEDITED, ZERO, counted, fixedCacheSpan, gitOf, nextMinute, statusOf } from './status'
@@ -77,6 +77,12 @@ async function keep($: EngineInterface) {
   const { tokens, effort, edits, history, spend, spentAt } = now
   await $.store.set(id, { tokens, effort, edits, history, spend, spentAt } satisfies Counted)
 }
+
+/**
+ * What a /clear carries into the session after it. That session runs under a new id with its state empty, and no
+ * `session.start` fires for it; the timers and the player's bridge go on, their `$` now reading the new session.
+ */
+let carried: { machine: Environment; current: MusicPlayer | null; look: MusicLook | null; folded: boolean } | undefined
 
 /** The status's next wake while nothing on it moves. */
 let wake: Timer | undefined
@@ -360,8 +366,23 @@ export const register: Register = (on, options) => {
     return next(e)
   })
 
-  /** A session taken up again: the engine says how long ago its last response came, and the prompt cache has run that long. */
+  /**
+   * A session taken up again: the engine says how long ago its last response came, and the prompt cache has run that
+   * long. After a /clear, the new session starts from zero counts, with the machine, the player and the fold carried.
+   */
   on('classic.SessionStart', async ($, e, next) => {
+    if (e.source === 'clear' && carried !== undefined) {
+      const { machine, current, look, folded } = carried
+      carried = undefined
+      await Promise.all([
+        seed($),
+        update($, environment, () => machine),
+        update($, player, () => current),
+        update($, cover, () => look),
+        update($, isCompact, () => folded),
+      ])
+      void readGit($)
+    }
     const ago = e.seconds_since_last_response
     if (ago !== undefined) await update($, cachedAt, now => now ?? Date.now() - 1000 * ago)
     return next(e)
@@ -370,9 +391,8 @@ export const register: Register = (on, options) => {
   on('session.end', async ($, e, next) => {
     const ended = await next(e)
     if (e.reason === 'clear') {
-      const usage = await $.session.usage()
-      await revise($, () => ({ usage, tokens: ZERO, edits: UNEDITED, history: [], spend: [], spentAt: usage.cost?.usd ?? 0 }))
-      await Promise.all([keep($), update($, cachedAt, () => null)])
+      const [machine, current, look, folded] = await Promise.all([read($, environment), read($, player), read($, cover), read($, isCompact)])
+      if (machine !== null) carried = { machine, current, look, folded }
     } else {
       const machine = await read($, environment)
       if (machine?.folder != null) await $.process.run(['rm', '-rf', machine.folder])
