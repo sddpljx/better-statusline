@@ -49,8 +49,9 @@ export type Environment = {
   folder: string | null
   /** One terminal cell in the units the terminal reports its size in; null where it reports none. */
   cell: { width: number; height: number } | null
-  /** How far apart the terminal draws a braille cell's rows of dots, as a fraction of the cell's height. */
-  pitch: number
+  /** How the terminal draws braille: how far apart a cell's rows of dots stand, as a fraction of the cell's height, and
+   * whether its cells are whole pixels, as Ghostty's are. */
+  dots: { pitch: number; isWholePixels: boolean }
   /** Whether the terminal draws pictures over its cells. */
   drawsPictures: boolean
   icons: Icons

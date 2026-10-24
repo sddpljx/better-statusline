@@ -1,6 +1,6 @@
 import type { Edits, Environment, Git, Status, Tokens } from '../types'
 import type { Limit, StatusProps } from '../ui/shared'
-import { CELL } from './terminal'
+import { CELL, gridOf } from './terminal'
 
 export const ZERO: Tokens = { sent: 0, received: 0 }
 export const UNEDITED: Edits = { added: 0, removed: 0 }
@@ -85,7 +85,7 @@ export function statusOf(status: Status, machine: Environment, cachedAt: number 
     tokens: status.tokens,
     minute: Math.floor(now / 60_000),
     icons: machine.icons,
-    grid: { aspect: cell.height / cell.width, pitch: machine.pitch },
+    grid: gridOf(cell, machine.dots),
     isWorking,
     isMotionReduced: machine.isMotionReduced,
     isCompact: false,

@@ -80,9 +80,9 @@ type Dot = { x: number; y: number; at: number }
 const circles = new Map<string, { cols: number; dots: Dot[] }>()
 
 /**
- * The dots of a ring at most `rows` rows of cells tall on the terminal's dot grid, each with how far round the ring it
- * lies, clockwise from the top. Its top, bottom and sides each stand on a dot, so no side ends between two lines of
- * dots; of the heights and widths that do, the pair nearest a circle on the screen. Round it, one dot is taken per
+ * The dots of a ring `rows` rows of cells tall on the terminal's dot grid, each with how far round the ring it lies,
+ * clockwise from the top. Its top and bottom are the first and last rows of dots and its sides stand on the column that
+ * makes it the nearest a circle on the screen, so no side ends between two columns of dots. Round it, one dot is taken per
  * column where the circle runs flatter than a diagonal and one per row where it runs steeper, the nearest to it, and
  * the top left quarter is mirrored into the other three, so the ring is one line of dots the same on every side.
  */
@@ -92,14 +92,10 @@ function circle(rows: number, { aspect, pitch }: Grid) {
   if (kept !== undefined) return kept
   const px = (x: number) => (x >> 1) + 0.25 + 0.5 * (x & 1)
   const py = (y: number) => aspect * ((y >> 2) + pitch * (y & 3))
-  const h = rows * 4
-  let best = { right: 1, bottom: h - 1, miss: Infinity }
-  for (const bottom of [h - 1, h - 2])
-    for (let right = 1; px(right) - px(0) < 2 * (py(bottom) - py(0)); right++) {
-      const miss = Math.abs(Math.log((px(right) - px(0)) / (py(bottom) - py(0))))
-      if (miss < best.miss) best = { right, bottom, miss }
-    }
-  const { right, bottom } = best
+  const bottom = rows * 4 - 1
+  const tall = py(bottom) - py(0)
+  let right = 1
+  while (Math.abs(Math.log((px(right + 1) - px(0)) / tall)) < Math.abs(Math.log((px(right) - px(0)) / tall))) right++
   const [cx, cy, rx, ry] = [(px(0) + px(right)) / 2, (py(0) + py(bottom)) / 2, (px(right) - px(0)) / 2, (py(bottom) - py(0)) / 2]
   const nearest = (to: (i: number) => number, last: number, v: number) => {
     let found = 0
