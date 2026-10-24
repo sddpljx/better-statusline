@@ -1,4 +1,4 @@
-import { TONE, type Run } from './shared'
+import { TONE, type Grid, type Run } from './shared'
 
 /** How bright a dot is drawn: the empty track, the hue made faint, the hue, and warning past a limit's pace. */
 const FAINT = 1
@@ -13,10 +13,6 @@ const BITS = [
   [0x04, 0x20],
   [0x40, 0x80],
 ]
-
-/** How far apart a cell's four rows of dots stand, as a fraction of its height. Terminals draw them closer than the
- * quarter that would space them evenly down the screen, so the gap between two rows of cells is the wider one. */
-const PITCH = 0.218
 
 /** A field of braille dots `cols` cells wide and `rows` tall; a cell takes the brightest ink of its dots, as a
  * terminal cell has one foreground. */
@@ -80,39 +76,50 @@ export function trend(values: number[], cols: number, rows: number, hue: string)
   return f.runs(hue)
 }
 
-/** Points taken round a ring. */
-const STEPS = 40
-
 type Dot = { x: number; y: number; at: number }
 const circles = new Map<string, { cols: number; dots: Dot[] }>()
 
 /**
- * The dots of a ring as tall as `rows` rows of cells on the terminal's uneven dot grid, each with how far round the
- * ring it lies, clockwise from the top: `STEPS` points of the circle, found on the screen in cell widths and snapped
- * to the nearest dot, the right half's and their mirror for the left, so both sides match. `aspect` is a cell's
- * height over its width, which sets how many columns the circle spans.
+ * The dots of a ring at most `rows` rows of cells tall on the terminal's dot grid, each with how far round the ring it
+ * lies, clockwise from the top. Its top, bottom and sides each stand on a dot, so no side ends between two lines of
+ * dots; of the heights and widths that do, the pair nearest a circle on the screen. Round it, one dot is taken per
+ * column where the circle runs flatter than a diagonal and one per row where it runs steeper, the nearest to it, and
+ * the top left quarter is mirrored into the other three, so the ring is one line of dots the same on every side.
  */
-function circle(rows: number, aspect: number) {
-  const key = `${rows}@${aspect}`
+function circle(rows: number, { aspect, pitch }: Grid) {
+  const key = `${rows}@${aspect}@${pitch}`
   const kept = circles.get(key)
   if (kept !== undefined) return kept
-  const centre = (x: number, y: number) => [(x >> 1) + 0.25 + 0.5 * (x & 1), aspect * ((y >> 2) + PITCH * (y & 3))] as const
+  const px = (x: number) => (x >> 1) + 0.25 + 0.5 * (x & 1)
+  const py = (y: number) => aspect * ((y >> 2) + pitch * (y & 3))
   const h = rows * 4
-  const [top, bottom] = [centre(0, 0)[1], centre(0, h - 1)[1]]
-  const r = (bottom - top) / 2
-  const cols = Math.ceil(2 * r)
-  const [cx, cy] = [cols / 2, (top + bottom) / 2]
-  /** Across, the radius ends on the column of dots nearest the circle's own edge, so the side is one column all the way
-   * down: an edge between two columns would leave the widest point alone in the outer one, a dot sticking out. */
-  const across = Math.round(2 * (cx + r) - 0.5) / 2 + 0.25 - cx
-  const grid = Array.from({ length: cols * 2 * h }, (_, i) => {
-    const [x, y] = [i % (cols * 2), Math.floor(i / (cols * 2))]
-    const [px, py] = centre(x, y)
-    return { x, y, at: (1.25 - Math.atan2(cy - py, px - cx) / (2 * Math.PI)) % 1, px, py }
-  })
-  const nearest = (px: number, py: number) => grid.reduce((best, dot) => ((dot.px - px) ** 2 + (dot.py - py) ** 2 < (best.px - px) ** 2 + (best.py - py) ** 2 ? dot : best))
-  const right = Array.from({ length: STEPS / 2 + 1 }, (_, i) => nearest(cx + across * Math.sin((2 * Math.PI * i) / STEPS), cy - r * Math.cos((2 * Math.PI * i) / STEPS)))
-  const made = { cols, dots: [...new Set(right.flatMap(dot => [dot, grid[dot.y * cols * 2 + cols * 2 - 1 - dot.x]!]))] }
+  let best = { right: 1, bottom: h - 1, miss: Infinity }
+  for (const bottom of [h - 1, h - 2])
+    for (let right = 1; px(right) - px(0) < 2 * (py(bottom) - py(0)); right++) {
+      const miss = Math.abs(Math.log((px(right) - px(0)) / (py(bottom) - py(0))))
+      if (miss < best.miss) best = { right, bottom, miss }
+    }
+  const { right, bottom } = best
+  const [cx, cy, rx, ry] = [(px(0) + px(right)) / 2, (py(0) + py(bottom)) / 2, (px(right) - px(0)) / 2, (py(bottom) - py(0)) / 2]
+  const nearest = (to: (i: number) => number, last: number, v: number) => {
+    let found = 0
+    for (let i = 1; i <= last; i++) if (Math.abs(to(i) - v) < Math.abs(to(found) - v)) found = i
+    return found
+  }
+  const quarter: [number, number][] = []
+  for (let x = 0; px(x) <= cx; x++) {
+    const across = (cx - px(x)) / rx
+    if (across <= Math.SQRT1_2) quarter.push([x, nearest(py, bottom, cy - ry * Math.sqrt(1 - across ** 2))])
+  }
+  for (let y = 0; py(y) <= cy; y++) {
+    const down = (cy - py(y)) / ry
+    if (down <= Math.SQRT1_2) quarter.push([nearest(px, right, cx - rx * Math.sqrt(1 - down ** 2)), y])
+  }
+  const placed = new Map<number, Dot>()
+  for (const [qx, qy] of quarter)
+    for (const [x, y] of [[qx, qy], [right - qx, qy], [qx, bottom - qy], [right - qx, bottom - qy]] as const)
+      placed.set(y * (right + 1) + x, { x, y, at: (1.25 - Math.atan2(cy - py(y), px(x) - cx) / (2 * Math.PI)) % 1 })
+  const made = { cols: (right >> 1) + 1, dots: [...placed.values()] }
   circles.set(key, made)
   return made
 }
@@ -120,10 +127,10 @@ function circle(rows: number, aspect: number) {
 /**
  * A ring of dots lit clockwise from its top to `used` (warning past `pace`), the empty track beyond: one line of dots
  * all the way round, the spent part told from the rest by its colour alone. Any use at all lights its first dot.
- * Round on a terminal whose cells are `aspect` times as tall as wide.
+ * Round on the terminal's `grid` of dots.
  */
-export function ring(used: number, rows: number, aspect: number, hue: string, pace?: number) {
-  const { cols, dots } = circle(rows, aspect)
+export function ring(used: number, rows: number, grid: Grid, hue: string, pace?: number) {
+  const { cols, dots } = circle(rows, grid)
   const f = field(cols, rows)
   const reach = used > 0 ? Math.max(used, Math.min(...dots.map(dot => dot.at))) + 1e-9 : -1
   for (const { x, y, at } of dots) f.put(x, y, at <= reach ? (pace !== undefined && at > pace ? WARN : LIT) : FAINT)

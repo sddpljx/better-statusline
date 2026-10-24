@@ -13,6 +13,11 @@ export type TerminalEnv = {
 /** A cell of a common terminal font, for the terminals that report no size: the dot drawings find their circles by its proportions. */
 export const CELL = { width: 8, height: 17 }
 
+/** How far apart a braille cell's four rows of dots stand, as a fraction of its height. Ghostty draws braille itself,
+ * its rows a quarter of the cell apart; terminals that take it from a font draw them closer, so the gap between two rows
+ * of cells is the wider one. */
+const PITCH = { even: 0.25, font: 0.218 }
+
 /**
  * The terminal as its environment tells it, read the way the engine reads it. The engine's Image is kitty's graphics
  * protocol over a file on this machine: kitty and Ghostty draw it, and tmux, screen and ssh stand in its way. kitty,
@@ -25,5 +30,6 @@ export function terminalOf(env: TerminalEnv) {
   return {
     drawsPictures: Boolean(env.forced) || ((isKitty || isGhostty) && !isRelayed),
     hasIcons: isKitty || isGhostty || env.program === 'WezTerm',
+    pitch: isGhostty ? PITCH.even : PITCH.font,
   }
 }

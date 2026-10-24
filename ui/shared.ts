@@ -94,6 +94,9 @@ export type Local<Zone> = { zone: Zone | null; scrub: number | null; seek: { sec
 /** A rate-limit window: how much of it is spent, when it starts over, how long it runs, and the hue it wears. */
 export type Limit = { label: string; hue: string; percent: number; resetsAt: number | null; span: number }
 
+/** A terminal's braille dots: a cell's height over its width, and how far apart its rows of dots stand as a fraction of its height. */
+export type Grid = { aspect: number; pitch: number }
+
 export type StatusProps = {
   model: string
   effort: string | null
@@ -112,8 +115,8 @@ export type StatusProps = {
   /** The minute the band was drawn in: each new one draws the status again, which keeps its countdowns current while nothing on it moves. */
   minute: number
   icons: Icons
-  /** A terminal cell's height over its width: what the rings are drawn round by. */
-  aspect: number
+  /** The terminal's grid of braille dots: what the rings are drawn round by. */
+  grid: Grid
   isWorking: boolean
   isMotionReduced: boolean
   /** The band folded into one line. */

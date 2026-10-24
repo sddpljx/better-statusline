@@ -85,7 +85,7 @@ export function statusOf(status: Status, machine: Environment, cachedAt: number 
     tokens: status.tokens,
     minute: Math.floor(now / 60_000),
     icons: machine.icons,
-    aspect: cell.height / cell.width,
+    grid: { aspect: cell.height / cell.width, pitch: machine.pitch },
     isWorking,
     isMotionReduced: machine.isMotionReduced,
     isCompact: false,

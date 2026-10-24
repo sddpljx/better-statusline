@@ -1,7 +1,7 @@
 import type { ClientModule, ClientSurface } from 'claude-code'
 
 import { bars, lane, ring, trend } from './dots'
-import { ICON, RESERVE, TONE, amount, cells, ease, span, ticker, type Run, type StatusProps } from './shared'
+import { ICON, RESERVE, TONE, amount, cells, ease, span, ticker, type Grid, type Run, type StatusProps } from './shared'
 
 /** Claude Code's own spinner, swung there and back while the model works; at rest the mark holds still. */
 const FRAMES = ['·', '✢', '✳', '✶', '✻', '✽']
@@ -164,8 +164,8 @@ function header(props: StatusProps, at: Scene, room: number, hasSpend: boolean):
 }
 
 /** A ring lit as far as `used`, `heart` at its centre and, beside it, its name on the heart's own line and the detail beneath. */
-function ringPanel(label: string, hue: string, used: number, pace: number | undefined, heart: Run[], detail: string | null, aspect: number): Run[][] {
-  const face = ring(used, RING, aspect, hue, pace)
+function ringPanel(label: string, hue: string, used: number, pace: number | undefined, heart: Run[], detail: string | null, grid: Grid): Run[][] {
+  const face = ring(used, RING, grid, hue, pace)
   const across = breadth(face[1]!)
   const mid = Math.floor((across - breadth(heart)) / 2)
   return [
@@ -179,10 +179,10 @@ function ringPanel(label: string, hue: string, used: number, pace: number | unde
  * The prompt cache as a ring that runs down: lit for the life it has left of `life`, the minutes at its heart, warning
  * in its last tenth, and cold once it is spent.
  */
-function cachePanel(left: number | null, life: number, aspect: number) {
+function cachePanel(left: number | null, life: number, grid: Grid) {
   const minutes: Run[] = [{ text: String(Math.ceil((left ?? 0) / 60_000)), bold: true, ...((left ?? 0) <= life / 10 ? { color: TONE.warn } : {}) }, muted('m')]
   const heart = left === null ? [muted('–')] : left <= 0 ? [muted('cold')] : minutes
-  return ringPanel('cache', CACHE, Math.max(0, left ?? 0) / life, undefined, heart, `of ${span(life)}`, aspect)
+  return ringPanel('cache', CACHE, Math.max(0, left ?? 0) / life, undefined, heart, `of ${span(life)}`, grid)
 }
 
 /** A drawing of the row, and when it leaves a row too short for them all: the highest rank first. */
@@ -195,16 +195,16 @@ type Panel = { rank: number; block: Run[][] }
  */
 function panels(props: StatusProps, at: Scene, room: number) {
   const gutter = room >= 110 ? 6 : 4
-  const { context, cache, limits, aspect } = props
+  const { context, cache, limits, grid } = props
   const filled = context.tokens === null ? `of ${amount(context.window)}` : `${amount(context.tokens)}/${amount(context.window)}`
   const mostSpent = limits.reduce((most, limit, i) => (limit.percent > limits[most]!.percent ? i : most), 0)
   const rings: Panel[] = [
-    { rank: 0, block: ringPanel('context', CONTEXT, at.context / 100, undefined, figure(at.context), filled, aspect) },
-    { rank: 3, block: cachePanel(at.cache, cache.span, aspect) },
+    { rank: 0, block: ringPanel('context', CONTEXT, at.context / 100, undefined, figure(at.context), filled, grid) },
+    { rank: 3, block: cachePanel(at.cache, cache.span, grid) },
     ...limits.map((limit, i) => {
       const now = at.limits[i]!
       const heart = figure(now.percent, limitColor(limit.percent, now.pace))
-      return { rank: i === mostSpent ? 1 : 2, block: ringPanel(limit.label, limit.hue, now.percent / 100, now.pace, heart, now.left, aspect) }
+      return { rank: i === mostSpent ? 1 : 2, block: ringPanel(limit.label, limit.hue, now.percent / 100, now.pace, heart, now.left, grid) }
     }),
   ]
   const width = (block: Run[][]) => Math.max(...block.map(breadth))

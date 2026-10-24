@@ -49,6 +49,8 @@ export type Environment = {
   folder: string | null
   /** One terminal cell in the units the terminal reports its size in; null where it reports none. */
   cell: { width: number; height: number } | null
+  /** How far apart the terminal draws a braille cell's rows of dots, as a fraction of the cell's height. */
+  pitch: number
   /** Whether the terminal draws pictures over its cells. */
   drawsPictures: boolean
   icons: Icons

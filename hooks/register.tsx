@@ -171,6 +171,7 @@ async function setUp($: EngineInterface, options: Options) {
   const machine: Environment = {
     folder,
     cell,
+    pitch: terminal.pitch,
     drawsPictures: terminal.drawsPictures,
     icons: options.icons === 'auto' ? (terminal.hasIcons ? 'nerd' : 'unicode') : options.icons,
     isMotionReduced: options.motion === 'auto' ? motion?.stdout.trim() === '1' : options.motion === 'reduced',
