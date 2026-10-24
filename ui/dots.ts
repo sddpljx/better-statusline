@@ -102,13 +102,16 @@ function circle(rows: number, aspect: number) {
   const r = (bottom - top) / 2
   const cols = Math.ceil(2 * r)
   const [cx, cy] = [cols / 2, (top + bottom) / 2]
+  /** Across, the radius ends on the column of dots nearest the circle's own edge, so the side is one column all the way
+   * down: an edge between two columns would leave the widest point alone in the outer one, a dot sticking out. */
+  const across = Math.round(2 * (cx + r) - 0.5) / 2 + 0.25 - cx
   const grid = Array.from({ length: cols * 2 * h }, (_, i) => {
     const [x, y] = [i % (cols * 2), Math.floor(i / (cols * 2))]
     const [px, py] = centre(x, y)
     return { x, y, at: (1.25 - Math.atan2(cy - py, px - cx) / (2 * Math.PI)) % 1, px, py }
   })
   const nearest = (px: number, py: number) => grid.reduce((best, dot) => ((dot.px - px) ** 2 + (dot.py - py) ** 2 < (best.px - px) ** 2 + (best.py - py) ** 2 ? dot : best))
-  const right = Array.from({ length: STEPS / 2 + 1 }, (_, i) => nearest(cx + r * Math.sin((2 * Math.PI * i) / STEPS), cy - r * Math.cos((2 * Math.PI * i) / STEPS)))
+  const right = Array.from({ length: STEPS / 2 + 1 }, (_, i) => nearest(cx + across * Math.sin((2 * Math.PI * i) / STEPS), cy - r * Math.cos((2 * Math.PI * i) / STEPS)))
   const made = { cols, dots: [...new Set(right.flatMap(dot => [dot, grid[dot.y * cols * 2 + cols * 2 - 1 - dot.x]!]))] }
   circles.set(key, made)
   return made
