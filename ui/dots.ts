@@ -82,7 +82,9 @@ const circles = new Map<string, { cols: number; dots: Dot[] }>()
 /**
  * The dots of a ring `rows` rows of cells tall on the terminal's dot grid, each with how far round the ring it lies,
  * clockwise from the top. Its top and bottom are the first and last rows of dots and its sides stand on the column that
- * makes it the nearest a circle on the screen, so no side ends between two columns of dots. Round it, one dot is taken per
+ * makes it the nearest a circle on the screen, so no side ends between two columns of dots, of those an even number of
+ * dots apart: its centre then falls on the middle or the edge of a cell, where the words at its heart can stand
+ * centred, and never a quarter of a cell to one side. Round it, one dot is taken per
  * column where the circle runs flatter than a diagonal and one per row where it runs steeper, the nearest to it, and
  * the top left quarter is mirrored into the other three, so the ring is one line of dots the same on every side.
  */
@@ -95,7 +97,7 @@ function circle(rows: number, { aspect, pitch }: Grid) {
   const bottom = rows * 4 - 1
   const tall = py(bottom) - py(0)
   let right = 1
-  while (Math.abs(Math.log((px(right + 1) - px(0)) / tall)) < Math.abs(Math.log((px(right) - px(0)) / tall))) right++
+  while (Math.abs(Math.log((px(right + 2) - px(0)) / tall)) < Math.abs(Math.log((px(right) - px(0)) / tall))) right += 2
   const [cx, cy, rx, ry] = [(px(0) + px(right)) / 2, (py(0) + py(bottom)) / 2, (px(right) - px(0)) / 2, (py(bottom) - py(0)) / 2]
   const nearest = (to: (i: number) => number, last: number, v: number) => {
     let found = 0
