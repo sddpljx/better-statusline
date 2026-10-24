@@ -1,6 +1,6 @@
 {
   "name": "better-statusline",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "description": "A Claude Code status line with dot-matrix rings and a macOS music player.",
   "author": "Ewen Gao",
   "license": "MIT",

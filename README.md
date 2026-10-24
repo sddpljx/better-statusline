@@ -15,7 +15,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-2.1.289+-d97757?style=flat-square&labelColor=242137" alt="Claude Code 2.1.289 or later">
-  <img src="https://img.shields.io/badge/version-0.8.6-b1b9f9?style=flat-square&labelColor=242137" alt="Version 0.8.6">
+  <img src="https://img.shields.io/badge/version-0.8.7-b1b9f9?style=flat-square&labelColor=242137" alt="Version 0.8.7">
   <img src="https://img.shields.io/badge/license-MIT-91c882?style=flat-square&labelColor=242137" alt="MIT license">
 </p>
 

@@ -81,10 +81,11 @@ const circles = new Map<string, { cols: number; dots: Dot[] }>()
 
 /**
  * The dots of a ring `rows` rows of cells tall on the terminal's dot grid, each with how far round the ring it lies,
- * clockwise from the top. Its top and bottom are the first and last rows of dots and its sides stand on the column that
- * makes it the nearest a circle on the screen, so no side ends between two columns of dots, of those an even number of
- * dots apart: its centre then falls on the middle or the edge of a cell, where the words at its heart can stand
- * centred, and never a quarter of a cell to one side. Round it, one dot is taken per
+ * clockwise from the top, and the columns of cells it is drawn in: as many as it is tall in cell widths. Its top and
+ * bottom are the first and last rows of dots; its sides stand on the columns of dots the same way in from either edge,
+ * so its centre falls on the middle or the edge of a cell, where the words at its heart can stand centred, and no side
+ * ends between two columns. Of those, the widest no wider than the ring is tall: a ring a little tall still reads as
+ * round, where a wider one runs flat along its top. Round it, one dot is taken per
  * column where the circle runs flatter than a diagonal and one per row where it runs steeper, the nearest to it, and
  * the top left quarter is mirrored into the other three, so the ring is one line of dots the same on every side.
  */
@@ -96,28 +97,30 @@ function circle(rows: number, { aspect, pitch }: Grid) {
   const py = (y: number) => aspect * ((y >> 2) + pitch * (y & 3))
   const bottom = rows * 4 - 1
   const tall = py(bottom) - py(0)
-  let right = 1
-  while (Math.abs(Math.log((px(right + 2) - px(0)) / tall)) < Math.abs(Math.log((px(right) - px(0)) / tall))) right += 2
-  const [cx, cy, rx, ry] = [(px(0) + px(right)) / 2, (py(0) + py(bottom)) / 2, (px(right) - px(0)) / 2, (py(bottom) - py(0)) / 2]
-  const nearest = (to: (i: number) => number, last: number, v: number) => {
-    let found = 0
-    for (let i = 1; i <= last; i++) if (Math.abs(to(i) - v) < Math.abs(to(found) - v)) found = i
+  const cols = Math.ceil(tall)
+  let left = 0
+  while (px(2 * cols - 1 - left) - px(left) > tall) left++
+  const right = 2 * cols - 1 - left
+  const [cx, cy, rx, ry] = [cols / 2, (py(0) + py(bottom)) / 2, (px(right) - px(left)) / 2, tall / 2]
+  const nearest = (to: (i: number) => number, first: number, last: number, v: number) => {
+    let found = first
+    for (let i = first + 1; i <= last; i++) if (Math.abs(to(i) - v) < Math.abs(to(found) - v)) found = i
     return found
   }
   const quarter: [number, number][] = []
-  for (let x = 0; px(x) <= cx; x++) {
+  for (let x = left; px(x) <= cx; x++) {
     const across = (cx - px(x)) / rx
-    if (across <= Math.SQRT1_2) quarter.push([x, nearest(py, bottom, cy - ry * Math.sqrt(1 - across ** 2))])
+    if (across <= Math.SQRT1_2) quarter.push([x, nearest(py, 0, bottom, cy - ry * Math.sqrt(1 - across ** 2))])
   }
   for (let y = 0; py(y) <= cy; y++) {
     const down = (cy - py(y)) / ry
-    if (down <= Math.SQRT1_2) quarter.push([nearest(px, right, cx - rx * Math.sqrt(1 - down ** 2)), y])
+    if (down <= Math.SQRT1_2) quarter.push([nearest(px, left, right, cx - rx * Math.sqrt(1 - down ** 2)), y])
   }
   const placed = new Map<number, Dot>()
   for (const [qx, qy] of quarter)
-    for (const [x, y] of [[qx, qy], [right - qx, qy], [qx, bottom - qy], [right - qx, bottom - qy]] as const)
-      placed.set(y * (right + 1) + x, { x, y, at: (1.25 - Math.atan2(cy - py(y), px(x) - cx) / (2 * Math.PI)) % 1 })
-  const made = { cols: (right >> 1) + 1, dots: [...placed.values()] }
+    for (const [x, y] of [[qx, qy], [left + right - qx, qy], [qx, bottom - qy], [left + right - qx, bottom - qy]] as const)
+      placed.set(y * 2 * cols + x, { x, y, at: (1.25 - Math.atan2(cy - py(y), px(x) - cx) / (2 * Math.PI)) % 1 })
+  const made = { cols, dots: [...placed.values()] }
   circles.set(key, made)
   return made
 }
